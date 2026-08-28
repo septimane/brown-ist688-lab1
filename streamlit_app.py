@@ -1,6 +1,5 @@
 import streamlit as st
-from openai import OpenAI
-
+from openai import OpenAI, AuthenticationError
 # Show title and description.
 st.title("📄 Document question answering")
 st.write(
@@ -18,6 +17,12 @@ else:
 
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
+    try:
+        client.models.list()
+    except AuthenticationError:
+        st.error("Invalid API key. Please check it and try again.", icon="🚫")
+        st.stop()
+    st.success("API key accepted.", icon="✅")
 
     # Let the user upload a file via `st.file_uploader`.
     uploaded_file = st.file_uploader(
@@ -44,7 +49,7 @@ else:
 
         # Generate an answer using the OpenAI API.
         stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-5-nano",
             messages=messages,
             stream=True,
         )
