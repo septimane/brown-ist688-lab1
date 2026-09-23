@@ -52,9 +52,7 @@ def get_current_weather(location=DEFAULT_LOCATION):
     }
 
 
-# The tool definition handed to OpenAI. The model reads this and decides on its
-# own whether it needs to call the function. Note that "location" is not in
-# "required", which lets the model call the tool with no location at all.
+
 weather_tool = {
     "type": "function",
     "function": {
@@ -92,7 +90,7 @@ if go and city:
         {"role": "user", "content": f"What should I wear today in {city}?"},
     ]
 
-    # First call. tool_choice auto means the model decides whether it needs weather.
+   
     first = client.chat.completions.create(
         model=MODEL,
         messages=messages,
@@ -103,14 +101,12 @@ if go and city:
     reply = first.choices[0].message
 
     if not reply.tool_calls:
-        # The model decided it did not need weather. Just show what it said.
         st.write(reply.content)
         st.stop()
 
     call = reply.tool_calls[0]
     args = json.loads(call.function.arguments or "{}")
 
-    # If the model asked for weather without naming a location, fall back to Syracuse.
     location = args.get("location") or DEFAULT_LOCATION
 
     try:
@@ -122,7 +118,6 @@ if go and city:
     with st.expander("Weather the bot used"):
         st.json(weather)
 
-    # Second call. Hand the weather back to the model and ask for the actual advice.
     messages.append({
         "role": "assistant",
         "tool_calls": [{
